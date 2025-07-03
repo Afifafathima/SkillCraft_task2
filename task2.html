@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Scientific Calculator</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    body {
+      background: linear-gradient(to right, #434343, #000000);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .calculator {
+      background-color: #2f2f5f;
+      padding: 20px;
+      border-radius: 20px;
+      box-shadow: 0 15px 25px rgba(0,0,0,0.4);
+      width: 340px;
+    }
+
+    .display {
+      background-color: #1e1e2e;
+      color: #ffffff;
+      font-size: 2.2rem;
+      padding: 15px;
+      text-align: right;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      min-height: 60px;
+    }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+    }
+
+    button {
+      padding: 20px;
+      font-size: 1.3rem;
+      border: none;
+      border-radius: 12px;
+      background: #d8d8ea;
+      color: rgb(1, 0, 0);
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #7f7fe7;
+    }
+
+    button.operator {
+      background: #cf6c6c;
+    }
+
+    button.operator:hover {
+      background: #77eda6;
+    }
+
+    button.equal {
+      background: #df72a0;
+    }
+
+    button.equal:hover {
+      background: #1a4d35;
+    }
+
+    button.clear {
+      background: #c4943a;
+    }
+
+    button.zero {
+      grid-column: span 2;
+    }
+
+    button.function {
+      background: #00bcd4;
+    }
+
+    button.function:hover {
+      background: #26d9ea;
+    }
+  </style>
+</head>
+<body>
+  <div class="calculator">
+    <div id="display" class="display">0</div>
+    <div class="buttons">
+      <button class="function" data-fn="square">x²</button>
+      <button class="function" data-fn="sqrt">√</button>
+      <button class="function" data-fn="log">log</button>
+      <button class="clear">C</button>
+
+      <button>7</button>
+      <button>8</button>
+      <button>9</button>
+      <button class="operator">/</button>
+
+      <button>4</button>
+      <button>5</button>
+      <button>6</button>
+      <button class="operator">*</button>
+
+      <button>1</button>
+      <button>2</button>
+      <button>3</button>
+      <button class="operator">-</button>
+
+      <button class="zero">0</button>
+      <button>.</button>
+      <button class="equal">=</button>
+      <button class="operator">+</button>
+    </div>
+  </div>
+
+  <script>
+    const display = document.getElementById('display');
+    const buttons = document.querySelectorAll('button');
+
+    let currentInput = '';
+    let resultShown = false;
+
+    function updateDisplay(value) {
+      display.textContent = value || '0';
+    }
+
+    function calculateFunction(fn) {
+      try {
+        const value = parseFloat(currentInput);
+        let result;
+
+        if (isNaN(value)) return;
+
+        switch (fn) {
+          case 'square':
+            result = value ** 2;
+            break;
+          case 'sqrt':
+            result = Math.sqrt(value);
+            break;
+          case 'log':
+            result = Math.log10(value);
+            break;
+        }
+
+        currentInput = result.toString();
+        updateDisplay(currentInput);
+        resultShown = true;
+
+      } catch (err) {
+        updateDisplay("Error");
+        currentInput = '';
+      }
+    }
+
+    buttons.forEach(button => {
+      const fn = button.dataset.fn;
+      const value = button.textContent;
+
+      button.addEventListener('click', () => {
+        if (button.classList.contains('clear')) {
+          currentInput = '';
+          updateDisplay(currentInput);
+          return;
+        }
+
+        if (fn) {
+          calculateFunction(fn);
+          return;
+        }
+
+        if (button.classList.contains('equal')) {
+          try {
+            const result = eval(currentInput);
+            updateDisplay(result);
+            currentInput = result.toString();
+            resultShown = true;
+          } catch (err) {
+            updateDisplay('Error');
+            currentInput = '';
+          }
+          return;
+        }
+
+        if (resultShown && !isNaN(value)) {
+          currentInput = '';
+          resultShown = false;
+        }
+
+        currentInput += value;
+        updateDisplay(currentInput);
+      });
+    });
+
+    // Optional: Keyboard support
+    document.addEventListener('keydown', e => {
+      const key = e.key;
+
+      if (/[\d+\-*/.=]/.test(key)) {
+        if (key === '=') {
+          document.querySelector('.equal').click();
+        } else {
+          currentInput += key;
+          updateDisplay(currentInput);
+        }
+      }
+
+      if (key === 'Enter') {
+        e.preventDefault();
+        document.querySelector('.equal').click();
+      }
+
+      if (key === 'Backspace') {
+        currentInput = currentInput.slice(0, -1);
+        updateDisplay(currentInput);
+      }
+
+      if (key === 'c' || key === 'C') {
+        document.querySelector('.clear').click();
+      }
+    });
+  </script>
+</body>
+</html>
